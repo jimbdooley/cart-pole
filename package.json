@@ -1,0 +1,25 @@
+{
+  "name": "cart-pole",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "nodemonConfig": {
+    "ignore": ["public/*", "cpp/*"]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jimbdooley/cart-pole.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jimbdooley/cart-pole/issues"
+  },
+  "homepage": "https://github.com/jimbdooley/cart-pole#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
