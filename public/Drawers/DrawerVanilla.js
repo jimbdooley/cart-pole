@@ -19,7 +19,6 @@ const DrawerVanilla = {
         "green": Bitmap.createBitmap([[255, 0, 255, 0]], 1, 1, Bitmap.Config.ARGB_8888),
         "blue": Bitmap.createBitmap([[255, 0, 0, 255]], 1, 1, Bitmap.Config.ARGB_8888),
         "yellow": Bitmap.createBitmap([[255, 255, 255, 0]], 1, 1, Bitmap.Config.ARGB_8888),
-        "counterfeit": Bitmap.createBitmap([[255, 194, 178, 128]], 1, 1, Bitmap.Config.ARGB_8888),
         "shade": Bitmap.createBitmap([[220, 0, 0, 0]], 1, 1, Bitmap.Config.ARGB_8888),
     },
     bmpDrawables: {
@@ -29,7 +28,6 @@ const DrawerVanilla = {
         "intro_3": "intro_3.png",
     },
     strToTexHandleI: {},
-    strToLastLang: {},
     drawableStrToLoaded: {},
     texHandles: [],
     shader: null,
@@ -42,23 +40,15 @@ const DrawerVanilla = {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
     },
-    langToScoreSize: {},
-    langToLevelSize: {},
 
-    setup: function(context) {
-        while (this.drawableStrToLoaded.length > 0) this.drawableStrToLoaded.pop()
-        const texHandlesMutable = []
+    setup: function() {
         for (key in this.bmpDrawables) {
-            this.strToTexHandleI[key] = texHandlesMutable.length
-            texHandlesMutable.push(-1)
+            this.strToTexHandleI[key] = this.texHandles.length
+            this.texHandles.push(gl.createTexture())
         }
         for (key in this.bmpInPlace) {
-            this.strToTexHandleI[key] = texHandlesMutable.length
-            texHandlesMutable.push(-1)
-        }
-        this.texHandles = texHandlesMutable
-        for (let i = 0; i < this.texHandles.length; i++) {
-            this.texHandles[i] = gl.createTexture()
+            this.strToTexHandleI[key] = this.texHandles.length
+            this.texHandles.push(gl.createTexture())
         }
         for (key in this.bmpInPlace) {
             this.setupBmp(this.bmpInPlace[key], this.texHandles[this.strToTexHandleI[key]])
@@ -77,31 +67,12 @@ const DrawerVanilla = {
         console.log("Drawer Created", "Vanilla Drawer")
     },
 
-    DIRECT_LIGHT: [0, 0, 1],
-    LIGHT_30_85: [
-        0.3,
-        0.85 * Math.sqrt(1 - 0.3 * 0.3),
-        Math.sqrt(1 - 0.85 * 0.85) * Math.sqrt(1 - 0.3*0.3)
-    ],
-    LIGHT_RIGHT: [Math.sqrt(2)/2, 0, Math.sqrt(2)/2],
-    BTN_NOT_PRESSED: [0.1, 0.3, Math.sqrt(0.9)],
-    BTN_PRESSED: [0.65*0.1, 0.65*0.3, 0.65*Math.sqrt(0.9), ],
-    draw: function(o, bmpName, bufs, lightArray=this.DIRECT_LIGHT){
-        World.pvm.updateWithDisplayObject(o)
+    DIRECT_LIGHT: [0, 1, 0],
+    _draw: function(bmpName, bufs, lightArray) {
 
         if (bmpName in this.bmpDrawables) {
             if (!(bmpName in this.drawableStrToLoaded) || !this.drawableStrToLoaded[bmpName]) {
                 const bmp = drawable[this.bmpDrawables[bmpName]]
-                if (bmpName.length >= 2 && bmpName.substring(0, bmpName.length-2) == "level_") {
-                    const bmpSize = [bmp.width, bmp.height]
-                    const langStr = bmpName.substring(bmpName.length-2, bmpName.length).toString()
-                    this.langToLevelSize[langStr] = bmpSize
-                }
-                if (bmpName.length >= 2 && bmpName.substring(0, bmpName.length-2) == "score_") {
-                    const bmpSize = [bmp.width, bmp.height]
-                    const langStr = bmpName.substring(bmpName.length-2, bmpName.length).toString()
-                    this.langToScoreSize[langStr] = bmpSize
-                }
                 this.setupBmp(bmp, this.texHandles[this.strToTexHandleI[bmpName]])
                 this.drawableStrToLoaded[bmpName] = true
             }
@@ -122,7 +93,6 @@ const DrawerVanilla = {
         gl.enableVertexAttribArray(this.texLoc)
         gl.vertexAttribPointer(this.texLoc, COORDS_PER_VERTEX, gl.FLOAT, 0, 0, 0)
 
-
         gl.uniformMatrix4fv(this.pvmLoc, false, World.pvm.pvm)
         gl.uniformMatrix4fv(this.mLoc, false, World.pvm.m)
 
@@ -136,6 +106,13 @@ const DrawerVanilla = {
 
 
     },
-
+    draw: function(o, bmpName, bufs, lightArray=this.DIRECT_LIGHT) {
+        World.pvm.updateWithDisplayObject(o)
+        this._draw(bmpName, bufs, lightArray)
+    },
+    drawQ: function(o, e0, e1, e2, e3, bmpName, bufs, lightArray=this.DIRECT_LIGHT) {
+        World.pvm.updateWithQuaternions(o, e0, -e1, -e2, -e3)
+        this._draw(bmpName, bufs, lightArray)
+    }
 
 }

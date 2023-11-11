@@ -77,8 +77,8 @@ function setNaturalNormals(pos, norm, ind, i, hint=false) {
     cross[0] /= -mag
     cross[1] /= -mag
     cross[2] /= -mag
-    if(hint){
-        let dot = cross[0]*norm[ind[i].toInt()] + cross[1]*norm[ind[i+1].toInt()] + cross[2]*norm[ind[i+2].toInt()]
+    if (hint) {
+        let dot = cross[0]*norm[ind[i]] + cross[1]*norm[ind[i+1]] + cross[2]*norm[ind[i+2]]
         if (dot < 0) {
             cross[0] = -cross[0]
             cross[1] = -cross[1]
@@ -129,50 +129,49 @@ function rotateFromAxisAngle(u, th, vec) {
     ]
 }
 
-function rotateVectorFromThKTiltZ(thK, thTilt, thZ, v) {
+function rotateVectorFromThKTiltZ(thK, thTilt, thY, v) {
     const kVec = [Math.cos(thK), Math.sin(thK), 0]
     const tiltedVec = rotateFromAxisAngle(kVec, thTilt, v)
     const zRotAxis = rotateFromAxisAngle(kVec, thTilt, [0, 0, 1])
-    return rotateFromAxisAngle(zRotAxis, thZ, tiltedVec)
+    return rotateFromAxisAngle(zRotAxis, thY, tiltedVec)
 }
 
-function skewRotRodTrans(m, o) {
-    const cosThZ = Math.cos(o.thZ)
-    const sinThZ = Math.sin(o.thZ)
-    const t00 = cosThZ*o.sx
-    const t01 = -sinThZ*o.sy
-    const t10 = sinThZ*o.sx
-    const t11 = cosThZ*o.sy
-    const a = Math.cos(o.thTilt/2)
-    const sinThOver2 = Math.sin(o.thTilt/2)
-    const b = o.k0*sinThOver2
-    const c = o.k1*sinThOver2
-    const ab2 = 2*a*b
-    const ac2 = 2*a*c
-    const bc2 = 2*b*c
-    const aa = a*a
-    const bb = b*b
-    const cc = c*c
-    const d00 = aa + bb - cc
-    const d11 = aa - bb + cc
-    const d22 = aa - bb - cc
-    m[0] = d00*t00 + bc2*t10
-    m[1] = bc2*t00 + d11*t10
-    m[2] = ab2*t10 - ac2*t00
-    m[3] = 0
-    m[4] = d00*t01 + bc2*t11
-    m[5] = bc2*t01 + d11*t11
-    m[6] = ab2*t11 - ac2*t01
-    m[7] = 0
-    m[8] = o.sz*ac2
-    m[9] = -o.sz*ab2
-    m[10] = o.sz*d22
-    m[11] = 0
-    m[12] = o.x
-    m[13] = o.y
-    m[14] = o.z
-    m[15] = 1
-}
+const skewRotRodTrans = (() => {
+    const tempM = new Float32Array(16)
+    const rot2 = new Float32Array(16)
+    const u = [0, 0, 0]
+    return function(m, o) {
+        const cosThY = Math.cos(o.thY)
+        const sinThY = Math.sin(o.thY)
+        tempM[0] = o.sx * cosThY
+        tempM[1] = 0
+        tempM[2] = o.sx * sinThY
+        tempM[3] = 0
+        tempM[4] = 0
+        tempM[5] = o.sy
+        tempM[6] = 0
+        tempM[7] = 0
+        tempM[8] = -o.sz * sinThY
+        tempM[9] = 0
+        tempM[10] = o.sz * cosThY
+        tempM[11] = 0
+        tempM[12] = o.x
+        tempM[13] = o.y
+        tempM[14] = o.z
+        tempM[15] = 1
+        u[0] = o.k0
+        u[1] = o.k1
+        rotMatFromAxisAngle(u, o.thTilt, rot2)
+        mul3x3sOf4x4s(rot2, tempM, m)
+        m[3] = tempM[3]
+        m[7] = tempM[7]
+        m[11] = tempM[11]
+        m[12] = tempM[12]
+        m[13] = tempM[13]
+        m[14] = tempM[14]
+        m[15] = tempM[15]
+    }
+})();
 
 
 function dot(a, b){
@@ -195,8 +194,7 @@ function cross_and_normalize(a, b) {
     return [x[0]/mag, x[1]/mag, x[2]/mag]
 }
 
-function mul3x3sOf4x4s(a, b, _dst) {
-    const dst = new Float32Array(16)
+function mul3x3sOf4x4s(a, b, dst) {
     dst[0] = a[0]*b[0] + a[4]*b[1] + a[8]*b[2]
     dst[1] = a[1]*b[0] + a[5]*b[1] + a[9]*b[2]
     dst[2] = a[2]*b[0] + a[6]*b[1] + a[10]*b[2]
@@ -206,18 +204,6 @@ function mul3x3sOf4x4s(a, b, _dst) {
     dst[8] = a[0]*b[8] + a[4]*b[9] + a[8]*b[10]
     dst[9] = a[1]*b[8] + a[5]*b[9] + a[9]*b[10]
     dst[10] = a[2]*b[8] + a[6]*b[9] + a[10]*b[10]
-    if (_dst != null) {
-        _dst[0] = dst[0]
-        _dst[1] = dst[1]
-        _dst[2] = dst[2]
-        _dst[4] = dst[4]
-        _dst[5] = dst[5]
-        _dst[6] = dst[6]
-        _dst[8] = dst[8]
-        _dst[9] = dst[9]
-        _dst[10] = dst[10]
-    }
-    return dst
 }
 
 function mul4By4(a, b, _dst) {
@@ -311,13 +297,8 @@ function invert4By4(m, _dst) {
 }
 
 
-function lookAt(cameraPosition, target, up=[0, 1, 0], _dst=null)  {
-    const dst = _dst == null ? new Float32Array([
-        0, 0, 0, 0, 
-        0, 0, 0, 0, 
-        0, 0, 0, 0, 
-        0, 0, 0, 0
-    ]) : _dst
+function lookAt(cameraPosition, target, up, _dst=null)  {
+    const dst = _dst == null ? new Float32Array(16) : _dst
     const zx = cameraPosition[0] - target[0];
     const zy = cameraPosition[1] - target[1];
     const zz = cameraPosition[2] - target[2];
@@ -351,12 +332,7 @@ function lookAt(cameraPosition, target, up=[0, 1, 0], _dst=null)  {
 }
 
 function perspective(_dst, aspect, fov, near=NEAR, far=FAR) {
-    const dst = _dst == null ? new Float32Array([
-        0, 0, 0, 0, 
-        0, 0, 0, 0, 
-        0, 0, 0, 0, 
-        0, 0, 0, 0
-    ]) : _dst
+    const dst = _dst == null ? new Float32Array(16) : _dst
     for (let i = 0; i < dst.length; i++) dst[i] = 0
     const f = Math.tan(0.5 * (Math.PI - fov))
     const rangeInv = 1.0 / (near - far)
@@ -396,7 +372,9 @@ function bezier3V(v1, v2, v3, r) {
     return bezier2V(w1, w2, r)
 }
 
-function sCurve(x) { return 3*x*x - 2*x*x*x }
+function sCurve(x) { 
+    return 3*x*x - 2*x*x*x 
+}
 
 function sCurveInv(x, maxToMin=5) {
     const c = 2 * Math.sqrt(maxToMin - 1)

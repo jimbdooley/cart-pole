@@ -2,4 +2,3 @@ const COORDS_PER_VERTEX = 4
 const VERTEX_STRIDE = 4 * COORDS_PER_VERTEX
 const NEAR = 0.1
 const FAR = 370
-

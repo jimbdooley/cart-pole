@@ -7,6 +7,9 @@
 node_modules/
 dist/
 
+chrono_build/
+chrono/
+
 # Compiled Java class files
 *.class
 

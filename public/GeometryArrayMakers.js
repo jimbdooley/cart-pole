@@ -1,5 +1,6 @@
 
-function objProperToPosNormIndTex(fileStr) {
+function objToPosNormIndTex(fileStr) {
+    while (fileStr.indexOf("\r") != -1) { fileStr = fileStr.replace("\r", "\n") }
     while (fileStr.indexOf("\n\n") != -1) { fileStr = fileStr.replace("\n\n", "\n") }
     const es = []
     for (el of fileStr.split("\n")) {
@@ -60,38 +61,6 @@ function objProperToPosNormIndTex(fileStr) {
 
 }
 
-function objToPosNormInd(fileStr) {
-    while (fileStr.indexOf("\n\n") != -1) { fileStr = fileStr.replace("\n\n", "\n") }
-    const es = []
-    for (el of fileStr.split("\n")) {
-        const new_row = []
-        for (el2 of el.split(" ")) {
-            new_row.push(el2)
-        }
-        es.push(new_row)
-    }
-
-    const posMutableList = []
-    const normMutableList = []
-    const indMutableList = []
-    for (const row of es) {
-        if (row.length == 0) continue
-        for (let i = 0; i < row.length; i++) {
-            if (i == 0) continue
-            if (row[0] == "v") posMutableList.push(parseFloat(row[i]))
-            if (row[0] == "vn") normMutableList.push(parseFloat(row[i]))
-            if (row[0] == "f") indMutableList.push(parseInt((row[i] - 1)))
-        }
-        if (row[0] == "v" && row.length == 4) posMutableList.push(1)
-        if (row[0] == "vn" && row.length == 4) normMutableList.push(0)
-    }
-    return PosNormInd(
-        posMutableList,
-        normMutableList,
-        indMutableList
-    )
-}
-
 function cartWheel() {
     const pos = []
     const norm = []
@@ -111,10 +80,6 @@ function cartWheel() {
         pos.push(x, y, -thickness, 1)
         pos.push(x*rSmall, y*rSmall, thickness, 1)
         pos.push(x*rSmall, y*rSmall, -thickness, 1)
-        norm.push(0, 0, 0, 0, 0, 0, 0, 0)
-        norm.push(0, 0, 0, 0, 0, 0, 0, 0)
-        norm.push(0, 0, 0, 0, 0, 0, 0, 0)
-        norm.push(0, 0, 0, 0, 0, 0, 0, 0)
         const j = (i + 1) % n
         const m = 8
         ind.push(m*i+1, m*i+0, m*j+0)
@@ -127,23 +92,80 @@ function cartWheel() {
         ind.push(m*i+7, m*j+6, m*j+7)
     }
 
-    for (let i = 0; i < ind.length; i+=3) {
-        setNaturalNormals(pos, norm, ind, i)
-    }
     for (let i = 0; i < pos.length; i += 4) {
+        norm.push(0, 0, 0, 0, 0, 0, 0, 0)
         tex.push(0.5 + 0.5 * pos[i])
         tex.push(0.5 - 0.5 * pos[i+1])
         tex.push(0)
         tex.push(0)
-        
+    }
+    for (let i = 0; i < ind.length; i+=3) {
+        setNaturalNormals(pos, norm, ind, i)
+    }
+    return PosNormIndTex(pos, norm, ind, tex)
+}
+
+function cube() {
+    const pos = [
+        -1, -1, -1, 1,
+         1, -1, -1, 1,
+         1,  1, -1, 1,
+        -1,  1, -1, 1,
+
+        -1,  1,  1, 1,
+        1,  1,  1, 1,
+        1, -1,  1, 1,
+        -1, -1,  1, 1,
+   
+       -1, -1, -1, 1,
+       -1,  1, -1, 1,
+       -1,  1,  1, 1,
+       -1, -1,  1, 1,
+   
+       1, -1,  1, 1,
+       1,  1,  1, 1,
+       1,  1, -1, 1, // good
+        1, -1, -1, 1,
+   
+       -1,  1, -1, 1,
+        1,  1, -1, 1,
+        1,  1,  1, 1, // good
+       -1,  1,  1, 1,
+   
+       -1, -1,  1, 1, // good
+       1, -1,  1, 1,
+       1, -1, -1, 1,
+       -1, -1, -1, 1,
+    ]
+    const tex = []
+    const norm = []
+    const ind = []
+    for (let i = 0; i < pos.length; i ++) norm.push(0)
+    for (let i = 0; i < pos.length/16; i ++) {
+        tex.push(0, 1, 0, 0)
+        tex.push(1, 1, 0, 0)
+        tex.push(1, 0, 0, 0)
+        tex.push(0, 0, 0, 0)
+        ind.push(4 * i + 0)
+        ind.push(4 * i + 2)
+        ind.push(4 * i + 1)
+        ind.push(4 * i + 2)
+        ind.push(4 * i + 0)
+        ind.push(4 * i + 3)
+    }
+    for (let i = 0; i < ind.length; i += 3) {
+        setNaturalNormals(pos, norm, ind, i)
     }
     return PosNormIndTex(pos, norm, ind, tex)
 }
 
 const PosNormIndTexs = {
+    cube: cube(),
     square: null,
+    crate: null,
     cartWheel: cartWheel(),
     setup() {
-        this.square = objProperToPosNormIndTex(assets["objs/square.obj"])
+        this.square = objToPosNormIndTex(assets["objs/square.obj"])
+        this.crate = objToPosNormIndTex(assets["objs/crate.obj"])
     }
 }
