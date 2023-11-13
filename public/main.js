@@ -20,7 +20,7 @@ function loop() {
     Animations.updateAll()
 }
 
-function play(which=0, dz, frz, n) {
+function play(which, dz, frz, n) {
     if (which == 0) {
     } 
     if (which == 1) {

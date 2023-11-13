@@ -11,6 +11,9 @@ chrono_build/
 chrono/
 public/scripts/
 sim_builds/
+sim0_build/
+sim1_build/
+simCart_build/
 
 # Compiled Java class files
 *.class
