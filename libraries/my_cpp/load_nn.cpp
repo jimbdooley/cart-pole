@@ -1,6 +1,15 @@
 
 #include "load_nn.h"
 
+void nnMatrixVectorMultiply(std::vector<std::vector<double>>& m, std::vector<double>& v, std::vector<double>& dst) {
+    for (size_t i = 0; i < m.size(); ++i) {
+        dst[1+i] = 0.0;
+        for (size_t j = 0; j < m[0].size(); ++j) {
+            dst[1+i] += m[i][j] * v[j];
+        }
+    }
+}
+
 void matrixVectorMultiply(std::vector<std::vector<double>>& m, std::vector<double>& v, std::vector<double>& dst) {
     for (size_t i = 0; i < m.size(); ++i) {
         dst[i] = 0.0;
@@ -58,7 +67,10 @@ void BasicNN::forward() {
         layers[0][1+i] = input[i];
     }
     for (int i = 0; i < nn.size() - 1; i++) {
-        matrixVectorMultiply(nn[i], layers[i], layers[i+1]);
+        nnMatrixVectorMultiply(nn[i], layers[i], layers[i+1]);
+        for (int j = 0; j < layers[i+1].size(); j++) {
+            layers[i+1][j] = layers[i+1][j] < 0.0 ? 0.0 : layers[i+1][j];
+        }
     }
     int finalI = nn.size() - 1;
     matrixVectorMultiply(nn[finalI], layers[finalI], output);

@@ -22,5 +22,6 @@ public:
 std::string myReadFile(std::string& s);
 
 void matrixVectorMultiply(std::vector<std::vector<double>>& m, std::vector<double>& v, std::vector<double>& dst);
+void nnMatrixVectorMultiply(std::vector<std::vector<double>>& m, std::vector<double>& v, std::vector<double>& dst);
 
 #endif

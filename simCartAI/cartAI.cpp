@@ -57,6 +57,11 @@ double getZRotationFromQuaternion(double w, double x, double y, double z) {
     double sign = z < 0 ? -1.0 : 1.0;
     return sign * 2.0 * atan2(sinThetaOver2, w);
 }
+double getAbsZRotationFromQuaternion(double w, double x, double y, double z) {
+    double sinThetaOver2 = sqrt(x*x + y*y + z*z);
+    if (sinThetaOver2 == 0.0) return 0.0;
+    return 2.0 * atan2(sinThetaOver2, w);
+}
 
 void saveStringToFile(std::string s, std::string fileName) {
     std::ofstream outputFile(fileName);
@@ -216,7 +221,7 @@ int main(int argc, char* argv[]) {
     auto pole_body = els[4];
     auto weight_body = els[5];
 
-    std::vector<std::string> ss(5, "");
+    std::vector<std::string> ss(6, "");
     for (int i = 0; i < ss.size(); i++) ss[i].reserve(1000000);
     double startImpulse = getRand(-3000.0, 3000.0);
     startImpulse = startImpulse < 0.0 ? startImpulse - 4650.0 : startImpulse + 4650.0;
@@ -227,23 +232,25 @@ int main(int argc, char* argv[]) {
     std::random_device rd;
     std::mt19937 explore(rd());
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
-    double force;
 
-    for (int i = 0; i < 2000; i++) {
+    bool useNegative;
+    for (int i = 0; i < 1200; i++) {
 
         if (i < 2) { weight_body->Accumulate_force(ChVector<>(startImpulse, 0.0, 0.0), weight_body->GetPos(), false); }
         if (i == 2) { weight_body->Empty_forces_accumulators(); }
 
+        double cartX = cart_body->GetPos().x();
+        auto rot = pole_body->GetRot();
+        double poleTh = getZRotationFromQuaternion(rot.e0(), rot.e1(), rot.e2(), rot.e3());
+        if(abs(poleTh) > 1.7) break;
+
         if (distribution(explore) < exploreFactor) {
-            double force = distribution(explore) < 0.5 ? -40000 : 40000;
+            useNegative = distribution(explore) < 0.5;
         } else {
-            nn.input[0] = cart_body->GetPos().x();
+            nn.input[0] = cartX;
             nn.input[1] = prevX;
-            auto rot = pole_body->GetRot();
-            nn.input[2] = getZRotationFromQuaternion(rot.e0(), rot.e1(), rot.e2(), rot.e3());
+            nn.input[2] = poleTh;
             nn.input[3] = prevTh;
-            prevX = nn.input[0];
-            prevTh = nn.input[2];
 
             nn.input[4] = 1.0;
             nn.input[5] = 0.0;
@@ -253,19 +260,34 @@ int main(int argc, char* argv[]) {
             nn.input[5] = 1.0;
             nn.forward();
             double posWeight = nn.output[0];
-            force = negWeight > posWeight ? -40000 : 40000;
+            useNegative = negWeight > posWeight;
         }
+        prevX = cartX;
+        prevTh = poleTh;
+        double force = useNegative ? -40000 : 40000;
 
         cart_body->Empty_forces_accumulators();
         cart_body->Accumulate_force(ChVector<>(force,0,0), cart_body->GetPos(), false);
 
         sys.DoStepDynamics(0.01666667);
 
+        double score = 0.045 * (4.0 - abs(cart_body->GetPos().x()));
+        score = score < 0.0 ? 0.1 * score : score;
+        auto rotP = pole_body->GetRot();
+        score += 1.0 - 2.0 * getAbsZRotationFromQuaternion(rotP.e0(), rotP.e1(), rotP.e2(), rotP.e3());
+
         ss[0] += addNextFrame(cart_body, "\n");
         ss[1] += addNextFrame(wheel_FL, "\n");
         ss[2] += addNextFrame(wheel_FR, "\n");
         ss[3] += addNextFrame(pole_body, "\n");
         ss[4] += addNextFrame(weight_body, "\n");
+        ss[5] += std::to_string(cartX) + ",";
+        ss[5] += std::to_string(prevX) + ",";
+        ss[5] += std::to_string(poleTh) + ",";
+        ss[5] += std::to_string(prevTh) + ",";
+        ss[5] += std::to_string(useNegative ? 1.0 : 0.0) + ",";
+        ss[5] += std::to_string(useNegative ? 0.0 : 1.0) + ",";
+        ss[5] += std::to_string(score) + "\n";
         if (i % 120 == 119) { std::cout << "iterations: " << i + 1 << std::endl; }
     }
     saveStringToFile(ss[0], dir + "/cart.txt");
@@ -273,5 +295,6 @@ int main(int argc, char* argv[]) {
     saveStringToFile(ss[2], dir + "/wheel2.txt");
     saveStringToFile(ss[3], dir + "/pole.txt");
     saveStringToFile(ss[4], dir + "/weight.txt");
+    saveStringToFile(ss[5], dir + "/scores.txt");
     return 0;
 }

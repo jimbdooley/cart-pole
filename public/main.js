@@ -117,10 +117,10 @@ async function init() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.viewport(0, 0, canvas.width, canvas.height);
     
-    play(2, 0, -1, 0)
-    play(2, -4, -1, 1)
-    play(2, -8, -1, 2)
-
+    for (let i = 0; i < 17; i++) {
+        play(2, -24 + 3 * i, -1, i +0)
+    }
+    
     loop()
 }
 init()

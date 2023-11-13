@@ -14,7 +14,7 @@ const WorldPositions = {
     youCustomCameraPosition: JSON.parse('{}'),
 
     angled: JSON.parse('{"thY":1.2007963267948962,"pitch":-0.40539816339744794,"loc":[-12.84703004578927,13.750000000000009,-32.738382152075665],"target":[-12.514725193382526,13.355615317938542,-31.881624188808203],"up":[0,1,0]}'),
-    
+    angled2: JSON.parse('{"thY":1.2007963267948962,"pitch":-0.43539816339744797,"loc":[-27.100209180587637,24.099999999999937,-57.45698616911766],"target":[-26.772331680023182,23.6782285495897,-56.61164293217633],"up":[0,1,0]}'),    
 
 }
 
@@ -23,7 +23,7 @@ const World = {
     viewHeight: null,
     pvm: null,
     fov: 0.4668,
-    pos: "angled",
+    pos: "angled2",
     updatePosition() {
         const pos = WorldPositions[this.pos]
         updateFromKeyboard(pos)
