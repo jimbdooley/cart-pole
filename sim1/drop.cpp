@@ -57,38 +57,6 @@ void saveStringToFile(std::string s, std::string fileName) {
     }
 }
 
-auto AddFallingItems(ChSystemNSC& sys) {
-    // Shared contact materials for falling objects
-    auto sph_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
-    sph_mat->SetFriction(0.2f);
-    auto box_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
-    auto cyl_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
- 
-    // Create falling rigid bodies (spheres and boxes etc.)
-    auto sphereBody = chrono_types::make_shared<ChBodyEasySphere>(1.1,      // radius size
-                                                                    1000,     // density
-                                                                    sph_mat,  // contact material
-                                                                    collision_type);
-    sphereBody->SetPos(ChVector<>(-5 + ChRandom() * 10, 4 + 0.05, -5 + ChRandom() * 10));
-    sys.Add(sphereBody);
-
-    auto boxBody = chrono_types::make_shared<ChBodyEasyBox>(1.5, 1.5, 1.5,  // x,y,z size
-                                                            100,            // density
-                                                            box_mat,        // contact material
-                                                            collision_type);
-    boxBody->SetPos(ChVector<>(-5 + ChRandom() * 10, 4 + 0.05, -5 + ChRandom() * 10));
-    sys.Add(boxBody);
-
-    auto cylBody = chrono_types::make_shared<ChBodyEasyCylinder>(geometry::ChAxis::Y,  //
-                                                                    0.75, 0.5,            // radius, height
-                                                                    100,                  // density
-                                                                    cyl_mat,              // contact material
-                                                                    collision_type);
-    cylBody->SetPos(ChVector<>(-5 + ChRandom() * 10, 4 + 0.05, -5 + ChRandom() * 10));
-    sys.Add(cylBody);
-    return boxBody;
-}
-
 int main(int argc, char* argv[]) {
     // Set path to Chrono data directory
     SetChronoDataPath(CHRONO_DATA_DIR);
@@ -123,24 +91,32 @@ int main(int argc, char* argv[]) {
     floorBody->GetVisualShape(0)->SetMaterial(0, ground_mat_vis);
     sys.Add(floorBody);
 
-    auto box = AddFallingItems(sys);
+    auto box_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
+    auto boxBody = chrono_types::make_shared<ChBodyEasyBox>(1.5, 1.5, 1.5,  // x,y,z size
+                                                            100,            // density
+                                                            box_mat,        // contact material
+                                                            collision_type);
+    boxBody->SetPos(ChVector<>(0, 1.7, 0));
+    boxBody->SetWvel_loc(ChVector<>(1, 1, 0));
+
+    sys.Add(boxBody);
 
 
 
 
 
-
-    int cnt = 5001;
+    int cnt = 500;
     std::string s;
     s.reserve(1000000);
     std::string s2;
     s2.reserve(1000000);
     while (cnt-- > 0) {
         // Perform the integration stpe
-        sys.DoStepDynamics(0.001666667);
-        if (cnt % 10 == 0) {
-            s += addNextFrame(box);
+        if (cnt <500 && cnt >= 0) {
+            //boxBody->Accumulate_force(chrono::ChVector<>(250.0*cos(cnt*0.15), 0, 0), boxBody->GetPos(), false);
         }
+        sys.DoStepDynamics(0.01666667);
+        s += addNextFrame(boxBody);
         if (cnt % 100== 0) {
             std::cout << "iters left; " << cnt << std::endl;
         }

@@ -159,10 +159,116 @@ function cube() {
     return PosNormIndTex(pos, norm, ind, tex)
 }
 
+function cylinderY() {
+    const pos = []
+    const tex = []
+    const ind = []
+    const n = 50
+    for (let i = 0; i <= n;  i++) {
+        const x = Math.cos(2*Math.PI*i/n)
+        const z = Math.sin(2*Math.PI*i/n)
+        pos.push(x, 1,z, 1)
+        pos.push(x, -1, z, 1)
+        tex.push(i / n, 0, 0, 0)
+        tex.push(i / n, 1, 0, 0)
+        if (i == n) break
+        ind.push(2*i + 0)
+        ind.push(2*i + 2)
+        ind.push(2*i + 1)
+        ind.push(2*i + 1)
+        ind.push(2*i + 2)
+        ind.push(2*i + 3)
+    }
+
+    let nextInd = 1 + ind.reduce((a, c) => Math.max(a, c), -1)
+    pos.push(0, 1, 0, 1)
+    tex.push(0.5, 0.5, 0, 0)
+    for (let i = 0; i < n; i++) {
+        const x = Math.cos(2*Math.PI*i/n)
+        const z = Math.sin(2*Math.PI*i/n)
+        pos.push(x, 1, z, 1)
+        const j = (i + 1) % n
+        ind.push(nextInd, nextInd + j + 1, nextInd + i + 1)
+        tex.push(x*0.5 + 0.5, 0.5 - z*0.5, 0, 0)
+    }
+
+    nextInd = 1 + ind.reduce((a, c) => Math.max(a, c), -1)
+    pos.push(0, -1, 0, 1)
+    tex.push(0.5, 0.5, 0, 0)
+    for (let i = 0; i < n; i++) {
+        const x = Math.cos(2*Math.PI*i/n)
+        const z = Math.sin(2*Math.PI*i/n)
+        pos.push(x, -1, z, 1)
+        const j = (i + 1) % n
+        ind.push(nextInd, nextInd + i + 1, nextInd + j + 1)
+        tex.push(x*0.5 + 0.5, 0.5 - z*0.5, 0, 0)
+    }
+
+    const norm = pos.map(_ => 0)
+    for (let i = 0; i < ind.length; i += 3) {
+        setNaturalNormals(pos, norm, ind, i)
+    }
+    return PosNormIndTex(pos, norm, ind, tex)
+}
+
+function cylinderZ() {
+    const pos = []
+    const tex = []
+    const ind = []
+    const n = 50
+    for (let i = 0; i <= n;  i++) {
+        const x = Math.cos(2*Math.PI*i/n)
+        const y = Math.sin(2*Math.PI*i/n)
+        pos.push(x, y, 1, 1)
+        pos.push(x, y, -1, 1)
+        tex.push(x*0.5+0.5,0.5-y*0.5, 0, 0)
+        tex.push(x*0.5+0.5,0.5-y*0.5, 0, 0)
+        if (i == n) break
+        ind.push(2*i + 0)
+        ind.push(2*i + 1)
+        ind.push(2*i + 2)
+        ind.push(2*i + 2)
+        ind.push(2*i + 1)
+        ind.push(2*i + 3)
+    }
+
+    let nextInd = 1 + ind.reduce((a, c) => Math.max(a, c), -1)
+    pos.push(0, 0, 1, 1)
+    tex.push(0.5, 0.5, 0, 0)
+    for (let i = 0; i < n; i++) {
+        const x = Math.cos(2*Math.PI*i/n)
+        const y = Math.sin(2*Math.PI*i/n)
+        pos.push(x, y, 1, 1)
+        const j = (i + 1) % n
+        ind.push(nextInd, nextInd + i + 1, nextInd + j + 1)
+        tex.push(x*0.5 + 0.5, 0.5 - y*0.5, 0, 0)
+    }
+
+    nextInd = 1 + ind.reduce((a, c) => Math.max(a, c), -1)
+    pos.push(0, 0, -1, 1)
+    tex.push(0.5, 0.5, 0, 0)
+    for (let i = 0; i < n; i++) {
+        const x = Math.cos(2*Math.PI*i/n)
+        const y = Math.sin(2*Math.PI*i/n)
+        pos.push(x, y, -1, 1)
+        const j = (i + 1) % n
+        ind.push(nextInd, nextInd + j + 1, nextInd + i + 1)
+        tex.push(x*0.5 + 0.5, 0.5 - y*0.5, 0, 0)
+    }
+
+    const norm = pos.map(_ => 0)
+    for (let i = 0; i < ind.length; i += 3) {
+        setNaturalNormals(pos, norm, ind, i)
+    }
+    return PosNormIndTex(pos, norm, ind, tex)
+}
+
 const PosNormIndTexs = {
     cube: cube(),
     square: null,
     crate: null,
+    cylZ: cylinderZ(),
+    cylY: cylinderY(),
     cartWheel: cartWheel(),
     setup() {
         this.square = objToPosNormIndTex(assets["objs/square.obj"])

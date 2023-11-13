@@ -11,5 +11,6 @@ varying vec2 v_tex;
 void main() {
     gl_Position = u_pvmMat * a_pos;
     v_norm = normalize((u_mMat * a_norm).xyz);
+    //v_norm = vec3(0.0, 0.0, 1.0);
     v_tex = a_tex;
 }

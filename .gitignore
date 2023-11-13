@@ -9,6 +9,8 @@ dist/
 
 chrono_build/
 chrono/
+public/scripts/
+sim_builds/
 
 # Compiled Java class files
 *.class

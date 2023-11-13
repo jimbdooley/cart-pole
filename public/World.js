@@ -13,7 +13,9 @@ const WorldPositions = {
     // then in the World singleton, put the name of the position in the World.pos field
     youCustomCameraPosition: JSON.parse('{}'),
 
-    angled: JSON.parse('{"thY":1.1607963267948962,"pitch":-0.30539816339744785,"loc":[-9.401107250125037,10,-22.095907293627093],"target":[-9.020942647522675,9.699327061660846,-21.22122411722624],"up":[0,1,0]}')
+    angled: JSON.parse('{"thY":1.2007963267948962,"pitch":-0.40539816339744794,"loc":[-12.84703004578927,13.750000000000009,-32.738382152075665],"target":[-12.514725193382526,13.355615317938542,-31.881624188808203],"up":[0,1,0]}'),
+    
+
 }
 
 const World = {

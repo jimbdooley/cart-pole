@@ -5,15 +5,16 @@ const DrawerVanilla = {
     texLoc: -1,
     samplerLoc: -1,
     lightDirLoc: -1,
+    dxyzLoc: -1,
     pvmLoc: -1,
     mLoc: -1,
     bmpInPlace: {
         "gearMetal": Bitmap.createBitmap([[255, 100, 100, 112]], 1, 1, Bitmap.Config.ARGB_8888),
         "letter": Bitmap.createBitmap([
             [255, 55, 55, 55],
-            [255, 255, 255, 0],
-            [255, 0, 0, 0],
-            [255, 255, 255, 0],
+            [255, 105, 105, 105],
+            [255, 105, 105, 105],
+            [255, 55, 55, 55],
         ], 2, 2, Bitmap.Config.ARGB_8888),
         "red": Bitmap.createBitmap([[255, 255, 0, 0]], 1, 1, Bitmap.Config.ARGB_8888),
         "green": Bitmap.createBitmap([[255, 0, 255, 0]], 1, 1, Bitmap.Config.ARGB_8888),
@@ -62,13 +63,16 @@ const DrawerVanilla = {
         this.texLoc = gl.getAttribLocation(this.shader.full, "a_tex")
         this.samplerLoc = gl.getUniformLocation(this.shader.full, "u_sampler")
         this.lightDirLoc = gl.getUniformLocation(this.shader.full, "u_light_dir")
+        this.dxyzLoc = gl.getUniformLocation(this.shader.full, "u_dxyz")
         console.log("vanilla frag", this.shader.fragCompileLog)
         console.log("vanilla vert", this.shader.vertCompileLog)
         console.log("Drawer Created", "Vanilla Drawer")
     },
 
-    DIRECT_LIGHT: [0, 1, 0],
-    _draw: function(bmpName, bufs, lightArray) {
+    DIRECT_LIGHT: [0, 0.9, -Math.sqrt(1-0.9*0.9)],
+    DEFAULT_DXYZ: [0, 0, 0, 0],
+    _draw: function(bmpName, bufs, _dxyz) {
+        const dxyz = _dxyz == null ? this.DEFAULT_DXYZ : _dxyz
 
         if (bmpName in this.bmpDrawables) {
             if (!(bmpName in this.drawableStrToLoaded) || !this.drawableStrToLoaded[bmpName]) {
@@ -99,20 +103,21 @@ const DrawerVanilla = {
         gl.activeTexture(gl.TEXTURE0)
         gl.bindTexture(gl.TEXTURE_2D, this.texHandles[this.strToTexHandleI[bmpName]])
         gl.uniform1i(this.samplerLoc, 0)
-
-        gl.uniform3fv(this.lightDirLoc, lightArray)
+        
+        gl.uniform4fv(this.dxyzLoc, dxyz)
+        gl.uniform3fv(this.lightDirLoc, this.DIRECT_LIGHT)
 
         gl.drawElements(gl.TRIANGLES, bufs.indArr.length, gl.UNSIGNED_SHORT, 0)
 
 
     },
-    draw: function(o, bmpName, bufs, lightArray=this.DIRECT_LIGHT) {
+    draw: function(o, bmpName, bufs, dxyz) {
         World.pvm.updateWithDisplayObject(o)
-        this._draw(bmpName, bufs, lightArray)
+        this._draw(bmpName, bufs, dxyz)
     },
-    drawQ: function(o, e0, e1, e2, e3, bmpName, bufs, lightArray=this.DIRECT_LIGHT) {
+    drawQ: function(o, e0, e1, e2, e3, bmpName, bufs, dxyz) {
         World.pvm.updateWithQuaternions(o, e0, -e1, -e2, -e3)
-        this._draw(bmpName, bufs, lightArray)
+        this._draw(bmpName, bufs, dxyz)
     }
 
 }

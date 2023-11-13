@@ -18,18 +18,25 @@ router.get('/get_drawable_filenames', async function(req, res) {
   res.send(JSON.stringify(rtn))
 })
 
-router.get('/get_all_assets', async function(req, res) {
+async function getAllFoldersLvl2(_dir, res) {
   const rtn = {}
-  const dir = await fs.promises.opendir("public/assets")
+  const dir = await fs.promises.opendir("public/" + _dir)
   for await (const dirent of dir) {
-    const dir2 = await fs.promises.opendir(`public/assets/${dirent.name}`)
+    const dir2 = await fs.promises.opendir(`public/${_dir}/${dirent.name}`)
     for await (const dirent2 of dir2) {
-      const filedir = `public/assets/${dirent.name}/${dirent2.name}`
+      const filedir = `public/${_dir}/${dirent.name}/${dirent2.name}`
       rtn[`${dirent.name}/${dirent2.name}`] = fs.readFileSync(filedir, 'utf8')
     }
   }
   rtn.params = JSON.parse(fs.readFileSync(__dirname + "/params.json", "utf8"))
   res.send(JSON.stringify(rtn))
+}
+
+router.get('/get_all_assets', async function(req, res) {
+  await getAllFoldersLvl2("assets", res)
+});
+router.get('/get_all_scripts', async function(req, res) {
+  await getAllFoldersLvl2("scripts", res)
 });
 
 router.get('/drawable/:filename', function(req, res) {

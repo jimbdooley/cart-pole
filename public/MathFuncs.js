@@ -160,7 +160,7 @@ const skewRotRodTrans = (() => {
         tempM[14] = o.z
         tempM[15] = 1
         u[0] = o.k0
-        u[1] = o.k1
+        u[2] = o.k1
         rotMatFromAxisAngle(u, o.thTilt, rot2)
         mul3x3sOf4x4s(rot2, tempM, m)
         m[3] = tempM[3]

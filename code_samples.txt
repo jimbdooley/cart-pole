@@ -1,0 +1,8 @@
+
+
+**** create a fixed track  ****
+auto track_link = std::make_shared<ChLinkLockPrismatic>();
+ChQuaternion<> z2x;
+z2x.Q_from_AngAxis(CH_C_PI / 2, ChVector<>(0, 1, 0));
+track_link->Initialize(cart_body, ground, ChCoordsys<>(cart_body->GetPos(), z2x));
+sys.AddLink(track_link);

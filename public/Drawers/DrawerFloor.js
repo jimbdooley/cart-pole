@@ -4,8 +4,9 @@ const DrawerFloor = {
     normLoc: -1,
     texLoc: -1,
     dataLoc: -1,
+    lightDirLoc: -1,
     pvmLoc: -1,
-    mLoc: -1,    
+    mLoc: -1,
     shader: null,
     data: [0, 0, 0, 0, 0, 0, 0, 0],
 
@@ -21,15 +22,17 @@ const DrawerFloor = {
         this.normLoc = gl.getAttribLocation(this.shader.full, "a_norm")
         this.texLoc = gl.getAttribLocation(this.shader.full, "a_tex")
         this.dataLoc = gl.getUniformLocation(this.shader.full, "u_data")
+        this.lightDirLoc = gl.getUniformLocation(this.shader.full, "u_light_dir")
         console.log("vanilla frag", this.shader.fragCompileLog)
         console.log("vanilla vert", this.shader.vertCompileLog)
         console.log("Drawer Created", "Vanilla Drawer")
     },
 
-    DIRECT_LIGHT: [0, 0, 1],
-    draw: function(o, bufs){
+    DIRECT_LIGHT: [0, 0.9, -Math.sqrt(1-0.9*0.9)],
+    draw: function(o, bufs, drawCenter){
         World.pvm.updateWithDisplayObject(o)
         this.data[4] = o.sx
+        this.data[5] = drawCenter
         
         gl.useProgram(this.shader.full)
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufs.ind);
@@ -46,11 +49,11 @@ const DrawerFloor = {
         gl.enableVertexAttribArray(this.texLoc)
         gl.vertexAttribPointer(this.texLoc, COORDS_PER_VERTEX, gl.FLOAT, 0, 0, 0)
 
-
         gl.uniformMatrix4fv(this.pvmLoc, false, World.pvm.pvm)
         gl.uniformMatrix4fv(this.mLoc, false, World.pvm.m)
 
         gl.uniform4fv(this.dataLoc, this.data)
+        gl.uniform3fv(this.lightDirLoc, this.DIRECT_LIGHT)
 
         gl.drawElements(gl.TRIANGLES, bufs.indArr.length, gl.UNSIGNED_SHORT, 0)
 
