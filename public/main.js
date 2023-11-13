@@ -95,6 +95,7 @@ async function init() {
     
     play(2, 0, -1, 0)
     play(2, -4, -1, 1)
+    play(2, -8, -1, 2)
     play(2, 4, -1, 11)
 
     loop()
