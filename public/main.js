@@ -22,6 +22,30 @@ function loop() {
 
 function play(which, dz, frz, n) {
     if (which == 0) {
+        const cart = DisplayObject([0, 1.2, 0], [2.5, 1, 1])
+        const wheel1 = DisplayObject([0,0,0], [0.8, 0.8, 1.5])
+        const wheel2 = DisplayObject([0,0,0], [0.8, 0.8, 1.5])
+        const pole = DisplayObject([0,0,0], [0.12, 3, 0.12])
+        const weight = DisplayObject([0, 0, 0], [0.6, 0.6, 0.6])
+        const cartFollowers = [
+            {
+                dob: DisplayObject([0, 0, 0], [1, 1, 0.2]),
+                dXYZ: [0, 1, -0.5, 0],
+                bufs: PosNormIndTexs.cylZ,
+                texture: "GgearMetal",
+            },
+            {
+                dob: DisplayObject([0, 0, 0], [1, 1, 0.2]),
+                dXYZ: [0, 1, 0.5, 0],
+                bufs: PosNormIndTexs.cylZ,
+                texture: "GgearMetal",
+            },
+        ]
+        animate(dz, frz, cart, "Gred", PosNormIndTexs.cube, scripts["falling_Pxx/cart.txt"], cartFollowers)
+        animate(dz, frz, wheel1, "Gletter", PosNormIndTexs.cylZ, scripts["falling_Pxx/wheel1.txt"])
+        animate(dz, frz, wheel2, "Gletter", PosNormIndTexs.cylZ, scripts["falling_Pxx/wheel2.txt"])
+        animate(dz, frz, pole, "Gblue", PosNormIndTexs.cylY, scripts["falling_Pxx/pole.txt"])
+        animate(dz, frz, weight, "Gblue", PosNormIndTexs.cylY, scripts["falling_Pxx/weight.txt"])
     } 
     if (which == 1) {
         const cart = DisplayObject([0, 1.2, 0], [2.5, 1, 1])
@@ -96,7 +120,6 @@ async function init() {
     play(2, 0, -1, 0)
     play(2, -4, -1, 1)
     play(2, -8, -1, 2)
-    play(2, 4, -1, 11)
 
     loop()
 }

@@ -19,6 +19,7 @@
 #include "chrono/core/ChRealtimeStep.h"
 #include <random>
 #include <filesystem>
+#include "../../libraries/my_cpp/load_nn.h"
 //#include "chrono/physics/ChMaterialSurfaceNSC.h"
 //#include "chrono/physics/ChLinkLock.h"
  
@@ -180,12 +181,20 @@ std::vector<std::shared_ptr<ChBody>> makeSim(ChSystemNSC& sys) {
 }
 
 int main(int argc, char* argv[]) {
-
-    if (argc < 2) {
+    if (argc < 3) {
         std::cerr << "Usage: " << argv[0] << " \"data\"" << std::endl;
         return 1; 
     }
-    std::string inputData = argv[1];
+
+    std::string modelDir = "../../cartAI_model.csv";
+    auto nn = BasicNN(myReadFile(modelDir));
+    if (nn.size == 0) {
+        std::cerr << "Unable to load nn" << std::endl;
+        return 1;
+    }
+
+    double exploreFactor = std::stod(argv[1]) * 0.01;
+    std::string inputData = argv[2];
     std::string dir  = "../../public/scripts/cartAI_" + inputData;
     if (!std::filesystem::exists(dir)) {
         if (std::filesystem::create_directory(dir)) {
@@ -195,6 +204,7 @@ int main(int argc, char* argv[]) {
             return 1; 
         }
     }
+
 
     SetChronoDataPath(CHRONO_DATA_DIR);
 
@@ -211,15 +221,41 @@ int main(int argc, char* argv[]) {
     double startImpulse = getRand(-3000.0, 3000.0);
     startImpulse = startImpulse < 0.0 ? startImpulse - 4650.0 : startImpulse + 4650.0;
     
+    double prevTh = 0.0;
+    double prevX = 0.0;
+
+    std::random_device rd;
+    std::mt19937 explore(rd());
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    double force;
+
     for (int i = 0; i < 2000; i++) {
 
         if (i < 2) { weight_body->Accumulate_force(ChVector<>(startImpulse, 0.0, 0.0), weight_body->GetPos(), false); }
         if (i == 2) { weight_body->Empty_forces_accumulators(); }
 
-        auto rot = pole_body->GetRot();
-        double th = getZRotationFromQuaternion(rot.e0(), rot.e1(), rot.e2(), rot.e3());
-        double desiredTh = 0.01 * (cart_body->GetPos().x());
-        double force = (th < desiredTh ? 30000: -30000) - 10000 * th;
+        if (distribution(explore) < exploreFactor) {
+            double force = distribution(explore) < 0.5 ? -40000 : 40000;
+        } else {
+            nn.input[0] = cart_body->GetPos().x();
+            nn.input[1] = prevX;
+            auto rot = pole_body->GetRot();
+            nn.input[2] = getZRotationFromQuaternion(rot.e0(), rot.e1(), rot.e2(), rot.e3());
+            nn.input[3] = prevTh;
+            prevX = nn.input[0];
+            prevTh = nn.input[2];
+
+            nn.input[4] = 1.0;
+            nn.input[5] = 0.0;
+            nn.forward();
+            double negWeight = nn.output[0];
+            nn.input[4] = 0.0;
+            nn.input[5] = 1.0;
+            nn.forward();
+            double posWeight = nn.output[0];
+            force = negWeight > posWeight ? -40000 : 40000;
+        }
+
         cart_body->Empty_forces_accumulators();
         cart_body->Accumulate_force(ChVector<>(force,0,0), cart_body->GetPos(), false);
 

@@ -20,6 +20,7 @@ project(my_project)
 set(Chrono_DIR "../chrono_build/cmake")
 message("value of Chrono_DIR=" ${Chrono_DIR})
 
+
 #--------------------------------------------------------------
 # === 2 ===
 # Find the Chrono package and any REQUIRED or OPTIONAL modules
@@ -132,7 +133,7 @@ endif()
 # files in your project. 
 #--------------------------------------------------------------
 
-add_executable(cartAI cartAI.cpp)
+add_executable(cartAI cartAI.cpp "../libraries/my_cpp/load_nn.cpp")
 
 #--------------------------------------------------------------
 # Set properties for your executable target

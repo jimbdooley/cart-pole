@@ -9,6 +9,15 @@ const DrawerVanilla = {
     pvmLoc: -1,
     mLoc: -1,
     bmpInPlace: {
+        "GgearMetal": Bitmap.createBitmap([[155, 100, 100, 112]], 1, 1, Bitmap.Config.ARGB_8888),
+        "Gletter": Bitmap.createBitmap([
+            [155, 55, 55, 55],
+            [155, 105, 105, 105],
+            [155, 105, 105, 105],
+            [155, 55, 55, 55],
+        ], 2, 2, Bitmap.Config.ARGB_8888),
+        "Gred": Bitmap.createBitmap([[155, 255, 0, 0]], 1, 1, Bitmap.Config.ARGB_8888),
+        "Gblue": Bitmap.createBitmap([[155, 0, 0, 255]], 1, 1, Bitmap.Config.ARGB_8888),
         "gearMetal": Bitmap.createBitmap([[255, 100, 100, 112]], 1, 1, Bitmap.Config.ARGB_8888),
         "letter": Bitmap.createBitmap([
             [255, 55, 55, 55],
@@ -17,8 +26,8 @@ const DrawerVanilla = {
             [255, 55, 55, 55],
         ], 2, 2, Bitmap.Config.ARGB_8888),
         "red": Bitmap.createBitmap([[255, 255, 0, 0]], 1, 1, Bitmap.Config.ARGB_8888),
-        "green": Bitmap.createBitmap([[255, 0, 255, 0]], 1, 1, Bitmap.Config.ARGB_8888),
         "blue": Bitmap.createBitmap([[255, 0, 0, 255]], 1, 1, Bitmap.Config.ARGB_8888),
+        "green": Bitmap.createBitmap([[255, 0, 255, 0]], 1, 1, Bitmap.Config.ARGB_8888),
         "yellow": Bitmap.createBitmap([[255, 255, 255, 0]], 1, 1, Bitmap.Config.ARGB_8888),
         "shade": Bitmap.createBitmap([[220, 0, 0, 0]], 1, 1, Bitmap.Config.ARGB_8888),
     },
