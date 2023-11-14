@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/cartAI.dir/cartAI.cpp.o.d"
   "CMakeFiles/cartAI.dir/home/james/Documents/Projects/cart-pole/libraries/my_cpp/load_nn.cpp.o"
   "CMakeFiles/cartAI.dir/home/james/Documents/Projects/cart-pole/libraries/my_cpp/load_nn.cpp.o.d"
+  "CMakeFiles/cartAI.dir/home/james/Documents/Projects/cart-pole/libraries/my_cpp/my_utils.cpp.o"
+  "CMakeFiles/cartAI.dir/home/james/Documents/Projects/cart-pole/libraries/my_cpp/my_utils.cpp.o.d"
   "cartAI"
   "cartAI.pdb"
 )

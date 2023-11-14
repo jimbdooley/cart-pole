@@ -81,12 +81,12 @@ clean: CMakeFiles/cartAI.dir/clean
 CMakeFiles/cartAI.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cartAI.dir/build.make CMakeFiles/cartAI.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cartAI.dir/build.make CMakeFiles/cartAI.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/james/Documents/Projects/cart-pole/sim_builds/simCartAI/CMakeFiles --progress-num=1,2,3 "Built target cartAI"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/james/Documents/Projects/cart-pole/sim_builds/simCartAI/CMakeFiles --progress-num=1,2,3,4 "Built target cartAI"
 .PHONY : CMakeFiles/cartAI.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/cartAI.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/james/Documents/Projects/cart-pole/sim_builds/simCartAI/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/james/Documents/Projects/cart-pole/sim_builds/simCartAI/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/cartAI.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/james/Documents/Projects/cart-pole/sim_builds/simCartAI/CMakeFiles 0
 .PHONY : CMakeFiles/cartAI.dir/rule
