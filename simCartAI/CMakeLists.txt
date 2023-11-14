@@ -133,7 +133,7 @@ endif()
 # files in your project. 
 #--------------------------------------------------------------
 
-add_executable(cartAI cartAI.cpp "../libraries/my_cpp/load_nn.cpp")
+add_executable(cartAI cartAI.cpp "../libraries/my_cpp/load_nn.cpp" "../libraries/my_cpp/my_utils.cpp")
 
 #--------------------------------------------------------------
 # Set properties for your executable target

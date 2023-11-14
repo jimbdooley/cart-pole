@@ -76,15 +76,3 @@ void BasicNN::forward() {
     matrixVectorMultiply(nn[finalI], layers[finalI], output);
 }
 
-std::string myReadFile(std::string& s) {
-    std::ifstream file(s);
-
-    if (file.is_open()) {
-        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        file.close();
-        return content;
-    } else {
-        std::cerr << "Unable to open file: " << s << std::endl;
-        return "";
-    }
-}
