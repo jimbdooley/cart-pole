@@ -30,27 +30,43 @@ using namespace chrono;
 ChCollisionSystemType collision_type = ChCollisionSystemType::BULLET;
 
 
+void replace_all(std::string& str, const std::string& from, const std::string& to) {
+    size_t startPos = 0;
+    while ((startPos = str.find(from, startPos)) != std::string::npos) {
+        str.replace(startPos, from.length(), to);
+        startPos += to.length(); // Move past the replaced string
+    }
+}
+
+
 template <typename BodyType>
 std::string addNextFrame(const BodyType& body, std::string ending) {
-    std::string s = "";
     ChVector<double> curr = body->GetPos();
     ChQuaternion<double> rot = body->GetRot();
-    double my_e0 = static_cast<double>(rot.e0());
-    double my_e1 = static_cast<double>(rot.e1());
-    double my_e2 = static_cast<double>(rot.e2());
-    double my_e3 = static_cast<double>(rot.e3());
-    
-    std::ostringstream stream;
-    steam << std::fixed << std::setprecision(3) << curr.x();
-    s += std::to_string(stream.str()) + ",";
-    s += std::to_string(curr.y()) + ",";
-    s += std::to_string(curr.z()) + ",";
-    s += std::to_string(my_e0) + ",";
-    s += std::to_string(my_e1) + ",";
-    s += std::to_string(my_e2) + ",";
-    s += std::to_string(my_e3) + ending;
 
-    return s;
+    std::string oneToReplace = "1.0000";
+    std::string zeroToReplace = "0.0000";
+    int precision = oneToReplace.length() - 2;
+
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(precision);
+    stream << curr.x() << ",";
+    stream << curr.y() << ",";
+    stream << curr.z() << ",";
+    stream << static_cast<double>(rot.e0()) << ",";
+    stream << static_cast<double>(rot.e1()) << ",";
+    stream << static_cast<double>(rot.e2()) << ",";
+    stream << static_cast<double>(rot.e3()) << ending;
+    std::string rtn = stream.str();
+    
+    replace_all(rtn, oneToReplace, "1");
+    replace_all(rtn, zeroToReplace, "0");
+    for (int i = 0; i < precision - 1; i++) {
+        replace_all(rtn, "00,", "0,");
+        replace_all(rtn, "00\n,", "0\n");
+    }
+
+    return rtn;
 }
 
 
@@ -169,7 +185,10 @@ int main(int argc, char* argv[]) {
         return 1; 
     }
 
-    std::string modelDir = "../../cartAI_model.csv";
+    std::string root = "../../";
+    if (argc >= 4) root = argv[3];
+
+    std::string modelDir = root + "cartAI_model.csv";
     auto nn = BasicNN(myReadFile(modelDir));
     if (nn.size == 0) {
         std::cerr << "Unable to load nn" << std::endl;
@@ -178,7 +197,7 @@ int main(int argc, char* argv[]) {
 
     double exploreFactor = std::stod(argv[1]) * 0.01;
     std::string inputData = argv[2];
-    std::string dir  = "../../public/scripts/cartAI_" + inputData;
+    std::string dir  = root + "public/scripts/cartAI_" + inputData;
     std::cout << "saving scripts to " << dir << std::endl;
     if (!std::filesystem::exists(dir)) {
         if (std::filesystem::create_directory(dir)) {
@@ -227,13 +246,15 @@ int main(int argc, char* argv[]) {
             break;
         }
 
+        double cartVel = 60.0*(prevX-cartX);
+        double poleVel = 60.0*(prevTh-poleTh);
         if (distribution(explore) < exploreFactor) {
             useNegative = distribution(explore) < 0.5;
         } else {
             nn.input[0] = cartX;
-            nn.input[1] = prevX;
+            nn.input[1] = cartVel;
             nn.input[2] = poleTh;
-            nn.input[3] = prevTh;
+            nn.input[3] = poleVel;
 
             nn.input[4] = 1.0;
             nn.input[5] = 0.0;
@@ -258,9 +279,9 @@ int main(int argc, char* argv[]) {
         ss[3] += addNextFrame(pole_body, "\n");
         ss[4] += addNextFrame(weight_body, "\n");
         ss[5] += std::to_string(cartX) + ",";
-        ss[5] += std::to_string(60.0*(prevX-cartX)) + ",";
+        ss[5] += std::to_string(cartVel) + ",";
         ss[5] += std::to_string(poleTh) + ",";
-        ss[5] += std::to_string(60.0*(prevTh-poleTh)) + ",";
+        ss[5] += std::to_string(poleVel) + ",";
         ss[5] += std::to_string(useNegative ? 1 : 0) + ",";
         ss[5] += std::to_string(useNegative ? 0 : 1) + "\n";
         prevX = cartX;

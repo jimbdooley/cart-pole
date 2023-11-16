@@ -118,7 +118,7 @@ async function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     
     for (let i = 0; i < 10; i++) {
-        play(2, -16 + 4 * i, -1, i + 300)
+        play(2, -16 + 4 * i, -1, i + 80)
     }
     
     loop()
