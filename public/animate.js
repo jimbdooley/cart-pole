@@ -8,9 +8,6 @@ const Animations = {
         anim.obj.y = frame[1]
         anim.obj.z = frame[2] + anim.dz
         DrawerVanilla.drawQ(anim.obj, frame[3], frame[4], frame[5], frame[6], anim.texture, anim.bufs)
-        if (anim.logThZ) {
-            console.log(getZRotationFromQuaternion(frame[3], frame[4], frame[5], frame[6]))
-        }
         if (frame.length > 7) console.log(frame[7])
         for (const follower of anim.followers) {
             follower.dob.x = anim.obj.x

@@ -35,8 +35,15 @@ async function getAllFoldersLvl2(_dir, res) {
 router.get('/get_all_assets', async function(req, res) {
   await getAllFoldersLvl2("assets", res)
 });
-router.get('/get_all_scripts', async function(req, res) {
-  await getAllFoldersLvl2("scripts", res)
+
+router.get('/get_script/:folder', async function(req, res) {
+  const scripts = {}
+  for (file of ["cart.txt", "pole.txt", "weight.txt", "wheel1.txt", "wheel2.txt"]) {
+    console.log(`public/scripts/${req.params.folder}/${file}`)
+    const toOpen = `public/scripts/${req.params.folder}/${file}`
+    scripts[`${req.params.folder}/${file}`] = fs.readFileSync(toOpen, "utf8")
+  }
+  res.send(JSON.stringify(scripts))
 });
 
 router.get('/drawable/:filename', function(req, res) {

@@ -46,9 +46,20 @@ function check_for_drawables_after_delay(delay=100) {
   })
 }
 
+
+async function get_scripts(name, start, n) {
+  scripts = {}
+  for (let i = start; i < start+n;i++) {
+    console.log("/get_script/" + name + i )
+    const scripts2 = JSON.parse(await get("/get_script/" + name + i))
+    for (key in scripts2) {
+      scripts[key] = scripts2[key]
+    }
+  }
+}
+
 async function get_all_assets() {
   assets = JSON.parse(await get("get_all_assets"))
-  scripts = JSON.parse(await get("get_all_scripts"))
   let drawable_files = JSON.parse(await get("get_drawable_filenames"))
   for (let i = 0; i < drawable_files.length; i++) {
       const im = new Image()

@@ -103,7 +103,10 @@ function play(which, dz, frz, n) {
 }
 
 async function init() {
+    const n = 10
+    const start = 0
     await get_all_assets()
+    await get_scripts("cartAI_dCartAI_", start, n)
     DrawerVanilla.setup()
     DrawerFloor.setup()
     PosNormIndTexs.setup()
@@ -117,8 +120,8 @@ async function init() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.viewport(0, 0, canvas.width, canvas.height);
     
-    for (let i = 0; i < 10; i++) {
-        play(2, -16 + 4 * i, -1, i + 80)
+    for (let i = 0; i < n; i++) {
+        play(2, -16 + 4 * i, -1, i + start)
     }
     
     loop()

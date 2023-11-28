@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
 
     double exploreFactor = std::stod(argv[1]) * 0.01;
     std::string inputData = argv[2];
-    std::string dir  = root + "public/scripts/cartAI_" + inputData;
+    std::string dir  = root + "public/scripts/" + inputData;
     std::cout << "saving scripts to " << dir << std::endl;
     if (!std::filesystem::exists(dir)) {
         if (std::filesystem::create_directory(dir)) {
@@ -230,8 +230,10 @@ int main(int argc, char* argv[]) {
     std::random_device rd;
     std::mt19937 explore(rd());
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
-
-    bool useNegative;
+    std::random_device rd2;
+    std::mt19937 explore2(rd2());
+    std::uniform_real_distribution<double> distribution2(0.0, 1.99999999);
+    
     for (int i = 0; i < 3000; i++) {
 
         if (i < 2) { weight_body->Accumulate_force(ChVector<>(startImpulse, 0.0, 0.0), weight_body->GetPos(), false); }
@@ -246,27 +248,38 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        double cartVel = 60.0*(prevX-cartX);
-        double poleVel = 60.0*(prevTh-poleTh);
-        if (distribution(explore) < exploreFactor) {
-            useNegative = distribution(explore) < 0.5;
+        double cartVel = 60.0*(cartX-prevX);
+        double poleVel = 60.0*(poleTh-prevTh);
+        int choice = 0;
+        double bestChoiceVal = -999999.9;
+
+        float forceNegative = cartVel > 0.0 && poleVel > 0.0 && poleTh > 0.2;
+        float forcePositive = cartVel < 0.0 && poleVel < 0.0 && poleTh < -0.2;
+
+        if (forcePositive) {
+            choice = 1;
+        } else if (forceNegative) {
+            choice = 0;
+        } else if (distribution(explore) < exploreFactor) {
+            choice = (int)distribution2(explore2);
         } else {
             nn.input[0] = cartX;
             nn.input[1] = cartVel;
             nn.input[2] = poleTh;
             nn.input[3] = poleVel;
 
-            nn.input[4] = 1.0;
-            nn.input[5] = 0.0;
-            nn.forward();
-            double negWeight = nn.output[0];
-            nn.input[4] = 0.0;
-            nn.input[5] = 1.0;
-            nn.forward();
-            double posWeight = nn.output[0];
-            useNegative = negWeight > posWeight;
+            for (int i = 0; i < 2; i++) {
+                nn.input[4+i] = 1.0;
+                nn.forward();
+                if (nn.output[0] > bestChoiceVal) {
+                    bestChoiceVal = nn.output[0];
+                    choice = i;
+                }
+                nn.input[4+i] = 0.0;
+            }
         }
-        double force = useNegative ? -40000 : 40000;
+
+        double force = ((double)(choice)*8.0 - 4.0) * 10000.0;
 
         cart_body->Empty_forces_accumulators();
         cart_body->Accumulate_force(ChVector<>(force,0,0), cart_body->GetPos(), false);
@@ -282,8 +295,7 @@ int main(int argc, char* argv[]) {
         ss[5] += std::to_string(cartVel) + ",";
         ss[5] += std::to_string(poleTh) + ",";
         ss[5] += std::to_string(poleVel) + ",";
-        ss[5] += std::to_string(useNegative ? 1 : 0) + ",";
-        ss[5] += std::to_string(useNegative ? 0 : 1) + "\n";
+        ss[5] += std::to_string(choice) + "\n";
         prevX = cartX;
         prevTh = poleTh;
         
